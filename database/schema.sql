@@ -1,0 +1,28 @@
+-- NEXUS Transport SQL Server schema reference.
+-- Use EF Core migrations OR this script, not both on the same empty database.
+CREATE DATABASE NexusTransportDb;
+GO
+USE NexusTransportDb;
+GO
+CREATE TABLE dbo.Drivers (
+ Id INT IDENTITY(1,1) PRIMARY KEY, FullName NVARCHAR(160) NOT NULL,
+ PhoneNumber NVARCHAR(40) NOT NULL DEFAULT N'', LicenseNumber NVARCHAR(80) NOT NULL DEFAULT N'',
+ Status NVARCHAR(30) NOT NULL DEFAULT N'Available'
+);
+GO
+CREATE TABLE dbo.Trucks (
+ Id INT IDENTITY(1,1) PRIMARY KEY, Code NVARCHAR(40) NOT NULL UNIQUE,
+ RegistrationNumber NVARCHAR(30) NOT NULL, CapacityKg DECIMAL(12,2) NOT NULL,
+ Status NVARCHAR(30) NOT NULL DEFAULT N'Available',
+ DriverId INT NULL REFERENCES dbo.Drivers(Id)
+);
+GO
+CREATE TABLE dbo.Shipments (
+ Id INT IDENTITY(1,1) PRIMARY KEY, Code NVARCHAR(40) NOT NULL UNIQUE,
+ Origin NVARCHAR(160) NOT NULL, Destination NVARCHAR(160) NOT NULL,
+ Pallets INT NOT NULL CHECK (Pallets >= 0), WeightKg DECIMAL(12,2) NOT NULL CHECK (WeightKg > 0),
+ Priority INT NOT NULL DEFAULT 0, Status INT NOT NULL DEFAULT 0,
+ CreatedAtUtc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+ TruckId INT NULL REFERENCES dbo.Trucks(Id) ON DELETE SET NULL
+);
+GO
